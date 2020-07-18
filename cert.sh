@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function logger::info {
-  printf "\033[0;36mINFO\033[0m $@\n"
+  printf "\033[0;36mINFO \033[0m $@\n"
 }
 
 function logger::warn {
@@ -26,9 +26,9 @@ function check_cert {
   echo | openssl s_client -servername $server_name -connect $server_name:$server_port 2>/dev/null | openssl x509 -noout -dates
   if [ $now -ge $notBefore ];
   then
-    logger::error 'The cluster certificate has not bean expired';
+    logger::info 'The cluster certificate has not bean expired';
   else
-    logger::info 'The cluster certificate has been expired';
+    logger::error 'The cluster certificate has been expired';
   fi
 }
 
