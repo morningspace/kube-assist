@@ -28,8 +28,6 @@ function parse_apiserver {
 function check_cert {
   logger::info 'Check if the cluster certificate is expired...'
 
-  parse_apiserver
-
   echo | openssl s_client -servername $server_name -connect $server_name:$server_port 2>/dev/null | openssl x509 -noout -dates
   if [ $now -ge $notBefore ];
   then
@@ -39,4 +37,5 @@ function check_cert {
   fi
 }
 
+parse_apiserver
 check_cert
