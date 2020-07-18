@@ -37,11 +37,12 @@ function get_pods {
     scope="all namespaces"
   else
     pods_info=($(oc get pod    -n $namespace | tail -n +2))
-    scope="namespace $NAMESPACE"
+    scope="namespace $namespace"
   fi
 }
 
 function check_pods {
+  logger::info "Checking pods in $scope..."
   local pod_num=${#pods_info[@]}
 
   for (( i = 0; i < pod_num; i += 6 )); do
