@@ -13,7 +13,6 @@ function logger::error {
   exit -1
 }
 
-
 function parse_apiserver {
   logger::info 'Detect API server name and port...'
   local context=$(kubectl config current-context)
