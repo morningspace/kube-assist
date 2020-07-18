@@ -44,7 +44,7 @@ function pick_context {
 
 function auth_context {
   # kubectl get users.user.openshift.io >/null 2>&1 || return
-  oc config current-context =~ kind- && return
+  [[ $current_ctx =~ kind- ]] && return
   
   printf "Find authenticated user: "
   if ! oc whoami ; then
