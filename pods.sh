@@ -45,14 +45,34 @@ function check_pods {
   logger::info "Checking pods in $scope..."
   local pod_num=${#pods_info[@]}
 
-  for (( i = 0; i < pod_num; i += 6 )); do
-    local namespace=${pods_info[i]}
-    local name=${pods_info[i+1]}
-    local ready=${pods_info[i+2]}
+  local step=5
+  local namespace
+  local name
+  local ready
+  local status
+  local restarts
+
+  if [[ $scope == "all namespaces" ]]; then
+    step=6
+  fi
+
+  for (( i = 0; i < pod_num; i += step )); do
+    if [[ $scope == "all namespaces" ]]; then
+      namespace=${pods_info[i]}
+      name=${pods_info[i+1]}
+      ready=${pods_info[i+2]}
+      status=${pods_info[i+3]}
+      restarts=${pods_info[i+4]}
+    else
+      namespace=${scope#namespace }
+      name=${pods_info[i]}
+      ready=${pods_info[i+1]}
+      status=${pods_info[i+2]}
+      restarts=${pods_info[i+3]}
+    fi
+
     local containers_total=${ready#*/}
     local containers_running=${ready%/*}
-    local status=${pods_info[i+3]}
-    local restarts=${pods_info[i+4]}
     local pod_failed=0
     if (( $containers_running == $containers_total )); then
       [[ $status != Completed && $status != Running ]] && pod_failed=1
