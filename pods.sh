@@ -17,8 +17,6 @@ pods_info_failed=()
 pods_info=()
 
 function get_pods {
-  logger::info "List pods in $scope..."
-
   local namespace
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -34,13 +32,17 @@ function get_pods {
     esac
   done
 
+  local ns_arg
   if [[ -z $namespace ]]; then
-    pods_info=($(kubectl get pod --all-namespaces | tail -n +2))
     scope="all namespaces"
+    ns_arg="--all-namespaces"
   else
-    pods_info=($(kubectl get pod    -n $namespace | tail -n +2))
     scope="namespace $namespace"
+    ns_arg="-n $namespace"
   fi
+
+  logger::info "List pods in $scope..."
+  pods_info=($(kubectl get pod $ns_arg | tail -n +2))
 }
 
 function check_pods {
