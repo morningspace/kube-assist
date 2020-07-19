@@ -2,7 +2,7 @@
 
 function usage {
   echo "
-Kuberntes command line extended
+Extended Kuberntes Command Line
 
 Usage:
   $0 [command] [options]
