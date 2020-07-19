@@ -17,6 +17,8 @@ pods_info_failed=()
 pods_info=()
 
 function get_pods {
+  logger::info "List pods in $scope..."
+
   local namespace
   while [[ $# -gt 0 ]]; do
     case "$1" in
