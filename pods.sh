@@ -33,10 +33,10 @@ function get_pods {
   done
 
   if [[ -z $namespace ]]; then
-    pods_info=($(oc get pod --all-namespaces | tail -n +2))
+    pods_info=($(kubectl get pod --all-namespaces | tail -n +2))
     scope="all namespaces"
   else
-    pods_info=($(oc get pod    -n $namespace | tail -n +2))
+    pods_info=($(kubectl get pod    -n $namespace | tail -n +2))
     scope="namespace $namespace"
   fi
 }
