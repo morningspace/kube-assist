@@ -46,21 +46,21 @@ function auth_context {
   # kubectl get users.user.openshift.io >/null 2>&1 || return
   [[ $current_ctx =~ kind- ]] && return
   
-  printf "Find authenticated user: "
-  if ! oc whoami ; then
-    local user_input=0
-    if cat $HOME/.kube/context-credentials | grep -q $current_ctx; then
-      local entry=($(cat $HOME/.kube/context-credentials | grep $current_ctx))
-      local credential=($(echo ${entry[1]} | base64 -d))
-      username=${credential[0]}
-      password=${credential[1]}
-      if [[ -z $username || -z $password ]]; then
-        user_input=1
-      fi
-    else
+  local user_input=0
+  if cat $HOME/.kube/context-credentials | grep -q $current_ctx; then
+    local entry=($(cat $HOME/.kube/context-credentials | grep $current_ctx))
+    local credential=($(echo ${entry[1]} | base64 -d))
+    username=${credential[0]}
+    password=${credential[1]}
+    if [[ -z $username || -z $password ]]; then
       user_input=1
     fi
+  else
+    user_input=1
+  fi
 
+  printf "Find authenticated user: "
+  if ! oc whoami ; then
     if [[ $user_input == 1 ]]; then
       echo -n -e "\033[0;36m? \033[0;37mUsername: \033[0m"
       read -r username
