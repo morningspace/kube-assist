@@ -1,94 +1,94 @@
 #!/bin/bash
 
-. $(dirname $0)/logs.sh
+. $(dirname $0)/utils.sh
 
-pods_info_failed=()
-pods_info=()
-
-function get_pods {
+function list_failed_pods {
   local namespace
+  local all_namespaces
+  local restarts_cap
   while [[ $# -gt 0 ]]; do
     case "$1" in
-    -n)
-      namespace=$2
-      shift # past argument
-      shift # past argument
-      ;;
-    *)      # unknown option
-      POSITIONAL+=("$1") # save it in an array for later use
-      shift # past argument
-      ;;
+    -n|--namespace)
+      namespace=$2; shift 2 ;;
+    -A|--all-namespaces)
+      all_namespaces=1; shift ;;
+    -r|--restarts)
+      restarts_cap=$2; shift 2 ;;
+    *)
+      shift ;;
     esac
   done
 
-  local ns_arg
-  if [[ -z $namespace ]]; then
+  local scope
+  local ns_flag
+  local pods_file
+  if [[ -n $namespace ]]; then
+    scope="$namespace namespace"
+    ns_flag="-n $namespace"
+    pods_file=$HOME/.ka/$namespace.pods
+  elif [[ -n $all_namespaces ]]; then
     scope="all namespaces"
-    ns_arg="--all-namespaces"
+    ns_flag="--all-namespaces"
+    pods_file=$HOME/.ka/all.pods
   else
-    scope="namespace $namespace"
-    ns_arg="-n $namespace"
+    scope="$(kubectl config view --minify --output 'jsonpath={..namespace}') namespace"
+    pods_file=$HOME/.ka/pods
   fi
 
-  logger::info "List pods in $scope..."
-  pods_info=($(kubectl get pod $ns_arg | tail -n +2))
-}
-
-function check_pods {
   logger::info "Checking pods in $scope..."
-  local pod_num=${#pods_info[@]}
 
-  local step=5
-  local namespace
-  local name
+  kubectl get pod $ns_flag 2>/dev/null >$pods_file || return 1
+
+  local parts
   local ready
   local status
   local restarts
+  local containers_total
+  local containers_running
+  local line_num=0
+  local failed_pods_lines=()
 
-  if [[ $scope == "all namespaces" ]]; then
-    step=6
-  fi
+  while IFS= read -r pod_line; do
+    (( line_num++ )); (( line_num == 1 )) && failed_pods_lines+=("$pod_line") && continue
 
-  for (( i = 0; i < pod_num; i += step )); do
+    parts=($pod_line)
+
     if [[ $scope == "all namespaces" ]]; then
-      namespace=${pods_info[i]}
-      name=${pods_info[i+1]}
-      ready=${pods_info[i+2]}
-      status=${pods_info[i+3]}
-      restarts=${pods_info[i+4]}
+      ready=${parts[2]}
+      status=${parts[3]}
+      restarts=${parts[4]}
     else
-      namespace=${scope#namespace }
-      name=${pods_info[i]}
-      ready=${pods_info[i+1]}
-      status=${pods_info[i+2]}
-      restarts=${pods_info[i+3]}
+      ready=${parts[1]}
+      status=${parts[2]}
+      restarts=${parts[3]}
     fi
+    
+    containers_total=${ready#*/}
+    containers_running=${ready%/*}
 
-    local containers_total=${ready#*/}
-    local containers_running=${ready%/*}
-    local pod_failed=0
+    local is_pod_failed=0
+
     if (( $containers_running == $containers_total )); then
-      [[ $status != Completed && $status != Running ]] && pod_failed=1
+      [[ $status != Completed && $status != Running ]] && is_pod_failed=1
     else
-      [[ $status != Completed ]] && pod_failed=1
+      [[ $status != Completed ]] && is_pod_failed=1
     fi
 
-    if [[ $pod_failed == 1 ]]; then
-      pods_info_failed+=("$namespace $name $ready $status $restarts")
-    fi
-  done
+    (( restarts > restarts_cap && restarts_cap != 0 )) && is_pod_failed=1
 
-  if [[ -z $pods_info_failed ]]; then
-    logger::info "Congratulations! All pods in $scope are up and runing."
+    if [[ $is_pod_failed == 1 ]]; then
+     failed_pods_lines+=("$pod_line")
+    fi
+  done < "$pods_file"
+
+  if (( line_num <= 1 )); then
+    logger::info "No failed resources found in $scope."
   else
-    logger::warn "Some pods in $scope are failed to start."
-    printf '%-35s %-70s %6s %20s %9s\n' 'NAMESPACE' 'NAME' 'READY' 'STATUS' 'RESTARTS'
-    printf '%-35s %-70s %6s %20s %9s\n' '---------' '----' '-----' '------' '--------'
-    for info in "${pods_info_failed[@]}"; do
-      printf '%-35s %-70s %6s %20s %9s\n' $info
+    logger::warn "Some failed resources found in $scope."
+    for failed_pod_line in "${failed_pods_lines[@]}"; do
+      echo "$failed_pod_line"
     done
   fi
 }
 
-get_pods "$@"
-check_pods
+list_failed_pods "$@"
