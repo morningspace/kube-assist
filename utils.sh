@@ -19,5 +19,5 @@ function logger::error {
 mkdir -p $HOME/.ka
 
 function on_exit {
-  rm -rf $HOME/.cp4mcm
+  rm -rf $HOME/.ka
 }
