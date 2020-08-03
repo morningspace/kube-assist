@@ -149,15 +149,36 @@ function delete_context {
   done
 }
 
-handle=list
+function help {
+  echo "
+Kuberntes Command Line Assistant: Context
+
+Display, change, delete, or add notes for cluster context using menu
+
+Usage:
+  $(dirname $(dirname $0))/ka.sh context|ctx [options]
+  $0 [options]
+
+Options:
+  -l|--list       List all available contexts
+  -c|--change     Change to a new context
+  -d|--delete     Delete a particular context
+  --no-auth       Force to skip authentication for those clusters do not need login
+  --refresh-auth  Force to refresh user login credential in case user password is changed
+  -h|--help       Print the help information
+"
+}
+
+handle=list_context
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    -l) handle=list; shift ;;
-    -c) handle=change; shift ;;
-    -d) handle=delete; shift ;;
+    -l|--list) handle=list_context; shift ;;
+    -c|--change) handle=change_context; shift ;;
+    -d|--delete) handle=delete_context; shift ;;
+    -h|--help) handle=help; shift ;;
     *)  POSITIONAL+=("$1"); shift ;;
   esac
 done
 
-${handle}_context ${POSITIONAL[@]}
+${handle} ${POSITIONAL[@]}

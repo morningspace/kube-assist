@@ -78,4 +78,31 @@ function print_logs {
   tail -n +1 <( eval "$cmd_to_tail" )
 }
 
-print_logs "$@"
+function help {
+  echo "
+Kuberntes Command Line Assistant: Logs
+
+Print logs for multiple pods in a particular namespace using different colors
+
+Usage:
+  $(dirname $(dirname $0))/ka.sh logs|logs [options]
+  $0 [options]
+
+Options:
+  -n|--namespace <ns>   Print pods logs in the specified namespace
+  -s|--since <duration> Only return logs newer than a relative duration like 5s, 2m, or 3h. Defaults to all logs
+  --tail                Lines of recent log file to display. Defaults to -1, showing all log lines
+  -h|--help             Print the help information
+"
+}
+
+handle=print_logs
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help) handle=help; shift ;;
+    *)  POSITIONAL+=("$1"); shift ;;
+  esac
+done
+
+${handle} ${POSITIONAL[@]}

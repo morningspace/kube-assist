@@ -91,4 +91,31 @@ function list_failed_pods {
   fi
 }
 
-list_failed_pods "$@"
+function help {
+  echo "
+Kuberntes Command Line Assistant: Pods
+
+List all pods that failed to run or are not healthy
+
+Usage:
+  $(dirname $(dirname $0))/ka.sh pods|pod|po [options]
+  $0 [options]
+
+Options:
+  -n|--namespace <ns>   List failed pods in a particular namespace
+  -A|--all-namespaces   List failed pods in all namespaces
+  -r|--restarts <num>   Take pod restarted more than <num> times as failed case
+  -h|--help             Print the help information
+"
+}
+
+handle=list_failed_pods
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help) handle=help; shift ;;
+    *)  POSITIONAL+=("$1"); shift ;;
+  esac
+done
+
+${handle} ${POSITIONAL[@]}
