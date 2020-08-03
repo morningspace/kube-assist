@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. $(dirname $0)/utils.sh
+. $(dirname $(dirname $0))/utils.sh
 
 function list_failed_pods {
   local namespace

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. $(dirname $0)/utils.sh
+. $(dirname $(dirname $0))/utils.sh
 
 CONTEXT_CREDENTIALS_FILE=$HOME/.kube/context-credentials
 mkdir -p $HOME/.kube
