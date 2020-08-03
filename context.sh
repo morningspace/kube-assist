@@ -1,14 +1,8 @@
 #!/bin/bash
 
-. $(dirname $0)/logs.sh
+. $(dirname $0)/utils.sh
 
 CONTEXT_CREDENTIALS_FILE=$HOME/.kube/context-credentials
-
-CYAN="\033[0;36m"
-NORMAL="\033[0m"
-RED="\033[0;31m"
-WHITE="\033[0;37m"
-
 mkdir -p $HOME/.kube
 touch $CONTEXT_CREDENTIALS_FILE
 
@@ -156,6 +150,7 @@ function delete_context {
 }
 
 handle=list
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -l) handle=list; shift ;;
