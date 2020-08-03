@@ -1,11 +1,17 @@
 #!/bin/bash
 
-. $(dirname $0)/utils.sh
+command_name=${1:-help}
 
-[[ -n $1 ]] && cmd=$1 || cmd="help"
+case $command_name in
+  context|pods|help) ;;
+  ctx) command_name="context" ;;
+  pod|po) command_name="pods" ;;
+  log) command_name="logs" ;;
+  *)
+    echo 'Argument "'$command_name'" not known.'
+    command_name="help" ;;
+esac
 
-if [[ -f $(dirname $0)/$cmd.sh ]]; then
-  . $(dirname $0)/$cmd.sh
-else
-  logger::error "Command not recognized."
-fi
+command_file=$(dirname $0)/commands/$command_name.sh
+
+[[ -f $command_file ]] && $command_file
