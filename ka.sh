@@ -3,7 +3,7 @@
 command_name=${1:-help}
 
 case $command_name in
-  context|pods|help) ;;
+  context|pods|logs|help) ;;
   ctx) command_name="context" ;;
   pod|po) command_name="pods" ;;
   log) command_name="logs" ;;
@@ -14,4 +14,4 @@ esac
 
 command_file=$(dirname $0)/commands/$command_name.sh
 
-[[ -f $command_file ]] && $command_file
+[[ -f $command_file ]] && $command_file ${@:2}
