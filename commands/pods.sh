@@ -81,7 +81,7 @@ function list_failed_pods {
     fi
   done < "$pods_file"
 
-  if (( line_num <= 1 )); then
+  if [ ${#failed_pods_lines[@]} -le 1 ]; then
     logger::info "No failed resources found in $scope."
   else
     logger::warn "Some failed resources found in $scope."
