@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. $(dirname $0)/logs.sh
+. $(dirname $0)/utils.sh
 
 [[ -n $1 ]] && cmd=$1 || cmd="help"
 
