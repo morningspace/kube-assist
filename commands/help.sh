@@ -11,7 +11,7 @@ Commands:
   context|ctx   Display, change, delete, or add notes for cluster context using menu
   pods|pod|po   List all pods that failed to run or are not healthy
   logs|log      Print logs for multiple pods in a specified namespace in different colors
-  cert          Detect whether the cluster certificate is expired or not
+  cert          Detect whether the API certificate is expired or not
 "
 }
 
