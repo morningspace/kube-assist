@@ -3,12 +3,12 @@
 command_name=${1:-help}
 
 case $command_name in
-  context|pods|logs|cert|help)    ;;
-  ctx)    command_name="context"  ;;
-  pod|po) command_name="pods"     ;;
-  log)    command_name="logs"     ;;
+  context|pods|logs|cert|dump|help) ;;
+  ctx)    command_name="context"    ;;
+  pod|po) command_name="pods"       ;;
+  log)    command_name="logs"       ;;
   *)      echo 'Argument "'$command_name'" not known.'
-          command_name="help"     ;;
+          command_name="help"       ;;
 esac
 
 command_script=$(dirname $0)/commands/$command_name.sh
