@@ -12,6 +12,7 @@ Commands:
   pods|pod|po   List all pods that failed to run or are not healthy
   logs|log      Print logs for multiple pods in a particular namespace using different colors
   cert          Detect whether the API certificate is expired or not
+  dump          Dump resources in a particular namespace
 "
 }
 
