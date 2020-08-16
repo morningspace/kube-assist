@@ -2,44 +2,21 @@
 
 . $(dirname $(dirname $0))/utils.sh
 
-function apply_masks {
+function print_with_masks {
   local resource=$1
-  masked="$(echo "$resource" | sed 's/\(.*\)-[a-z0-9]\{10\}-[a-z0-9]\{5\}\(  *\)/\1-**********-*****\2/')"
-  masked="$(echo "$masked"   | sed 's/\(.*\)-[a-z0-9]\{9\}-[a-z0-9]\{5\}\(  *\)/\1-*********-*****\2/')"
-  masked="$(echo "$masked"   | sed 's/\(.*\)-job-[a-z0-9]\{5\}\(  *\)/\1-job-*****\2/')"
-  echo -n "$masked"
 
-  # full_word=$(echo ${resource_line:${position%:*}:${position#*:}})
-  # IFS='-' read -a words <<< "$full_word"
-  # word_num=${#words[@]}
-  # last_word=${words[${word_num}-1]}
-  # [[ ${#last_word} == 5 ]] && echo "**$last_word**"
+  if [[ $apply_mask == 1 ]]; then
+    resource="$(echo "$resource" | sed 's/\(.*\)-[a-z0-9]\{10\}-[a-z0-9]\{5\}\(  *\)/\1-**********-*****\2/')"
+    resource="$(echo "$resource"   | sed 's/\(.*\)-[a-z0-9]\{9\}-[a-z0-9]\{5\}\(  *\)/\1-*********-*****\2/')"
+    resource="$(echo "$resource"   | sed 's/\(.*\)-job-[a-z0-9]\{5\}\(  *\)/\1-job-*****\2/')"
+    resource="$(echo "$resource"   | sed 's/\(.*\)-dockercfg-[a-z0-9]\{5\}\(  *\)/\1-dockercfg-*****\2/')"
+    resource="$(echo "$resource"   | sed 's/\(.*\)-token-[a-z0-9]\{5\}\(  *\)/\1-token-*****\2/')"
+  fi
+
+  echo -n "$resource"
 }
 
 function dump_in_namespace {
-  local namespace
-  local columns=()
-  local no_columns=()
-  local no_resources=()
-  local kubectl_flags=()
-  local POSITIONAL=()
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-    -n|--namespace)
-      namespace=$2; shift 2 ;;
-    --column)
-      IFS=',' read -a columns <<< "$2"; shift 2 ;;
-    --no-column)
-      IFS=',' read -a no_columns <<< "$2"; shift 2 ;;
-    --no-resource)
-      IFS=',' read -a no_resources <<< "$2"; shift 2 ;;
-    -o)
-      kubectl_flags+=($1 $2); shift 2 ;;
-    *)
-      POSITIONAL+=("$1"); shift;;
-    esac
-  done
-
   local api_resources=(${POSITIONAL[@]})
   if [[ -z ${api_resources[@]} ]]; then
     api_resources=($(oc api-resources --verbs=list --namespaced -o name))
@@ -122,10 +99,10 @@ function dump_in_namespace {
             if (( column_index < column_num )); then
               a=${position%:*}
               b=${position#*:}
-              echo -n "$(apply_masks ${resource_line:$a:$b})"
+              print_with_masks "${resource_line:$a:$b}"
             else
               a=${position%:*}
-              echo -n "$(apply_masks ${resource_line:$a})"
+              print_with_masks "${resource_line:$a}"
             fi
           fi
           (( column_index++ ))
@@ -139,3 +116,54 @@ function dump_in_namespace {
 }
 
 dump_in_namespace "$@"
+
+function help {
+  echo "
+Kuberntes Command Line Assistant: Dump
+
+Dump resources in a particular namespace
+
+Usage:
+  $(dirname $(dirname $0))/ka.sh dump [options]
+  $0 [options]
+
+Options:
+  -n|--namespace <ns>           Specify the namespace that you want to dump
+  --column <COL1,COL2,...>      Specify the columns that you want to display
+  --no-column <COL1,COL2,...>   Specify the columns that you do not want to display
+  --no-resource <RES1,RES2,...> Specify the resources that you do not want to dump
+  --mask                        Apply mask when display the name for some resources, e.g. pod, secret, job, etc.
+  -h|--help                     Print the help information
+"
+}
+
+handle=dump_in_namespace
+
+columns=()
+no_columns=()
+no_resources=()
+kubectl_flags=()
+POSITIONAL=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      handle=help; shift ;;
+    -n|--namespace)
+      namespace=$2; shift 2 ;;
+    --column)
+      IFS=',' read -a columns <<< "$2"; shift 2 ;;
+    --no-column)
+      IFS=',' read -a no_columns <<< "$2"; shift 2 ;;
+    --no-resource)
+      IFS=',' read -a no_resources <<< "$2"; shift 2 ;;
+    --mask)
+      apply_mask=1; shift ;;
+    -o)
+      kubectl_flags+=($1 $2); shift 2 ;;
+    *)
+      POSITIONAL+=("$1"); shift ;;
+  esac
+done
+
+${handle} "${POSITIONAL[@]}"
