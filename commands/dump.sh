@@ -7,10 +7,10 @@ function print_with_masks {
 
   if [[ $apply_mask == 1 ]]; then
     resource="$(echo "$resource" | sed 's/\(.*\)-[a-z0-9]\{10\}-[a-z0-9]\{5\}\(  *\)/\1-**********-*****\2/')"
-    resource="$(echo "$resource"   | sed 's/\(.*\)-[a-z0-9]\{9\}-[a-z0-9]\{5\}\(  *\)/\1-*********-*****\2/')"
-    resource="$(echo "$resource"   | sed 's/\(.*\)-job-[a-z0-9]\{5\}\(  *\)/\1-job-*****\2/')"
-    resource="$(echo "$resource"   | sed 's/\(.*\)-dockercfg-[a-z0-9]\{5\}\(  *\)/\1-dockercfg-*****\2/')"
-    resource="$(echo "$resource"   | sed 's/\(.*\)-token-[a-z0-9]\{5\}\(  *\)/\1-token-*****\2/')"
+    resource="$(echo "$resource" | sed 's/\(.*\)-[a-z0-9]\{9\}-[a-z0-9]\{5\}\(  *\)/\1-*********-*****\2/')"
+    resource="$(echo "$resource" | sed 's/\(.*\)-job-[a-z0-9]\{5\}\(  *\)/\1-job-*****\2/')"
+    resource="$(echo "$resource" | sed 's/\(.*\)-dockercfg-[a-z0-9]\{5\}\(  *\)/\1-dockercfg-*****\2/')"
+    resource="$(echo "$resource" | sed 's/\(.*\)-token-[a-z0-9]\{5\}\(  *\)/\1-token-*****\2/')"
   fi
 
   echo -n "$resource"
