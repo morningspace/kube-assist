@@ -115,8 +115,6 @@ function dump_in_namespace {
   done
 }
 
-dump_in_namespace "$@"
-
 function help {
   echo "
 Kuberntes Command Line Assistant: Dump
