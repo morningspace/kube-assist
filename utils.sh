@@ -21,3 +21,5 @@ mkdir -p $HOME/.ka
 function on_exit {
   rm -rf $HOME/.ka
 }
+
+trap on_exit exit
